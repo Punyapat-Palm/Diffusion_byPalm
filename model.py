@@ -59,13 +59,3 @@ class DiffusionModel(nn.Module):
             post_sigma = math.sqrt(self.beta(t)) * z
             x = pre_scale * (x - e_scale * e_hat) + post_sigma
             return x
-
-    def training_step(self, batch, batch_idx):
-        loss = self.get_loss(batch, batch_idx)
-        self.log("train/loss", loss, on_epoch=True, prog_bar=True)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        loss = self.get_loss(batch, batch_idx)
-        self.log("val/loss", loss, on_epoch=True, sync_dist=True, prog_bar=True)
-        return loss

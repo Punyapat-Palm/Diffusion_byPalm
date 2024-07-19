@@ -18,8 +18,12 @@ class DiffSet(Dataset):
         df = pd.read_csv(r'Dataset\train.csv')
         image_paths = []
         z = df[df['diagnosis'] == config['diagnosis']].values.tolist()
-        for i in range(len(z)):
-            image_paths.append(os.path.join(config['dataset'], f'{z[i][0]}.png'))
+        if self.is_train:
+            for i in range(int(len(z)*0.75)):
+                image_paths.append(os.path.join(config['dataset'], f'{z[i][0]}.png'))
+        else:
+            for j in range(int(len(z)*0.75), len(z)):
+                image_paths.append(os.path.join(config['dataset'], f'{z[j][0]}.png'))
         return image_paths
     
     def __len__(self):
