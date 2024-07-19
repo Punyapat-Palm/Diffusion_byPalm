@@ -73,7 +73,7 @@ def sample_images(model, output_dir, sample_batch_size=1, sample_steps=1000, dev
 if __name__ == "__main__":
     # Path to your diffusion_model.pth
     model_checkpoint = 'epochs{}_stage{}_V{}.pth'.format(config['max_epoch'], config['diagnosis'], config['version'])
-    output_directory = './sampled_images'
+    output_directory = '/sampled_images'
     train_dataset = DiffSet(True)
 
     # Initialize your DiffusionModel sure to initialize with appropriate parameters
