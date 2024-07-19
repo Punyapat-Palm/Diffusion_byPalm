@@ -15,7 +15,7 @@ class DiffSet(Dataset):
 
     def load_image_paths(self):
         # Modify this to load images from your dataset directory
-        df = pd.read_csv(r'Dataset\train.csv')
+        df = pd.read_csv(r'Dataset/train.csv')
         image_paths = []
         z = df[df['diagnosis'] == config['diagnosis']].values.tolist()
         if self.is_train:
