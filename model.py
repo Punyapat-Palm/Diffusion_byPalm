@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import math
+import numpy
 from modules import *
 
 
@@ -19,17 +20,15 @@ class DiffusionModel(nn.Module):
         return self.unet(x, t)
 
     def beta(self, t):
-        # Just a simple linear interpolation between beta_small and beta_large based on t
         return self.beta_small + (t / self.t_range) * (self.beta_large - self.beta_small)
 
     def alpha(self, t):
         return 1 - self.beta(t)
 
     def alpha_bar(self, t):
-        # Product of alphas from 0 to t
-        return math.prod([self.alpha(j) for j in range(t)])
+        return numpy.prod([self.alpha(j) for j in range(t)])
 
-    def get_loss(self, batch, batch_idx):
+    def get_loss(self, batch):
         ts = torch.randint(0, self.t_range, [batch.shape[0]], device=self.device)
         noise_imgs = []
         epsilons = torch.randn(batch.shape, device=self.device)
@@ -45,10 +44,7 @@ class DiffusionModel(nn.Module):
         )
         return loss
 
-    def denoise_sample(self, x, model, t):
-        """
-        Corresponds to the inner loop of Algorithm 2 from (Ho et al., 2020).
-        """
+    def denoise_sample(self, x, t):
         with torch.no_grad():
             t = torch.tensor([t], device=x.device)  # Ensure t is on the same device as x
             e_hat = self.forward(x, t.repeat(x.shape[0]))

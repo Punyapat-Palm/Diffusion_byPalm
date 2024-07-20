@@ -9,12 +9,11 @@ from config import config
 class DiffSet(Dataset):
     def __init__(self, is_train):
         self.is_train = is_train
-        self.size = 32  # Set this to the desired image size
-        self.depth = 3  # Set this to the number of image channels (e.g., 3 for RGB)
+        self.size = config['image_size']  # Set this to the desired image size
+        self.depth = config['depth']  # Set this to the number of image channels (e.g., 3 for RGB)
         self.image_paths = self.load_image_paths()
 
     def load_image_paths(self):
-        # Modify this to load images from your dataset directory
         df = pd.read_csv(r'Dataset/train.csv')
         image_paths = []
         z = df[df['diagnosis'] == config['diagnosis']].values.tolist()
