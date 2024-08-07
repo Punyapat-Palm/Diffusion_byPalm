@@ -15,6 +15,9 @@ class DiffusionModel(nn.Module):
         self.in_size = in_size
         self.device = device
         self.unet = Unet(dim = 64, dim_mults = (1, 2, 4, 8), channels=img_depth)
+        self.betas = self.beta(torch.arange(t_range, device=device))
+        self.alphas = 1 - self.betas
+        self.alpha_bars = torch.cumprod(self.alphas, dim=0)
 
     def forward(self, x, t):
         return self.unet(x, t)
@@ -26,21 +29,16 @@ class DiffusionModel(nn.Module):
         return 1 - self.beta(t)
 
     def alpha_bar(self, t):
-        return numpy.prod([self.alpha(j) for j in range(t)])
+        return self.alpha_bars[t]
 
     def get_loss(self, batch):
         ts = torch.randint(0, self.t_range, [batch.shape[0]], device=self.device)
-        noise_imgs = []
         epsilons = torch.randn(batch.shape, device=self.device)
-        for i in range(len(ts)):
-            a_hat = self.alpha_bar(ts[i].item())  # Ensure this is an item() call
-            noise_imgs.append(
-                (math.sqrt(a_hat) * batch[i]) + (math.sqrt(1 - a_hat) * epsilons[i])
-            )
-        noise_imgs = torch.stack(noise_imgs, dim=0).to(self.device)
+        a_hat = self.alpha_bars[ts].unsqueeze(1).unsqueeze(2).unsqueeze(3)
+        noise_imgs = (a_hat.sqrt() * batch) + ((1 - a_hat).sqrt() * epsilons)
         e_hat = self.forward(noise_imgs, ts)
         loss = nn.functional.mse_loss(
-            e_hat.reshape(-1, self.in_size), epsilons.reshape(-1, self.in_size)
+            e_hat.view(-1, self.in_size), epsilons.view(-1, self.in_size)
         )
         return loss
 

@@ -30,8 +30,8 @@ class DiffSet(Dataset):
 
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
-        img = Image.open(img_path).convert("RGB")
+        img = Image.open(img_path).convert("L")  # Convert to grayscale
         img = img.resize((self.size, self.size))  # Resize to the desired size
         img = np.array(img).astype(np.float32) / 255.0  # Normalize to [0, 1]
-        img = torch.tensor(img).permute(2, 0, 1)  # Convert to (C, H, W) format
+        img = torch.tensor(img).unsqueeze(0)  # Convert to (1, H, W) format
         return img
