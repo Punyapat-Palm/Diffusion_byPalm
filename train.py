@@ -21,10 +21,10 @@ train_dataset = DiffSet(True)
 val_dataset = DiffSet(False)
 
 train_loader = DataLoader(
-    train_dataset, batch_size=config['batch_size'], num_workers=16, shuffle=True, persistent_workers=True
+    train_dataset, batch_size=config['batch_size'], num_workers=8, shuffle=True, persistent_workers=True, pin_memory=True
 )
 val_loader = DataLoader(
-    val_dataset, batch_size=config['batch_size'], num_workers=16, shuffle=True, persistent_workers=True
+    val_dataset, batch_size=config['batch_size'], num_workers=8, shuffle=True, persistent_workers=True, pin_memory=True
 )
 
 def validate_model(model, val_loader, device):
@@ -93,8 +93,12 @@ def train_model(model, train_loader, val_loader, optimizer, epochs, opdir, devic
             print(f'Training loss: {best_val_loss:.8f} when epoch is: {last_epoch}')
             logging.info(f'Training loss: {best_val_loss:.8f} when epoch is: {last_epoch}')
 
-        if epoch - last_epoch > 250:
+        # If val_loss too high
+        threshold = 250 if epoch < 1000 else 500 if epoch < 2000 else None
+
+        if threshold and epoch - last_epoch > threshold:
             model.load_state_dict(torch.load(new_best_model_path, map_location=device, weights_only=True))
+            last_epoch = epoch + 1
             print('Load model from the last best model')
             logging.info('Load model from the last best model')
 
