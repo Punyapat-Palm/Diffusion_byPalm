@@ -4,7 +4,6 @@ import math
 import numpy
 from modules import *
 
-
 class DiffusionModel(nn.Module):
     def __init__(self, in_size, t_range, img_depth, device):
         super().__init__()
@@ -44,11 +43,11 @@ class DiffusionModel(nn.Module):
 
     def denoise_sample(self, x, t):
         with torch.no_grad():
-            t = torch.tensor([t], device=x.device)  # Ensure t is on the same device as x
+            t = torch.tensor([t], device=x.device)
             e_hat = self.forward(x, t.repeat(x.shape[0]))
             pre_scale = 1 / math.sqrt(self.alpha(t))
             e_scale = (1 - self.alpha(t)) / math.sqrt(1 - self.alpha_bar(t))
-            z = torch.randn_like(x, device=x.device) if t.item() > 1 else 0  # Ensure z is on the same device
+            z = torch.randn_like(x, device=x.device) if t.item() > 1 else 0
             post_sigma = math.sqrt(self.beta(t)) * z
             x = pre_scale * (x - e_scale * e_hat) + post_sigma
             return x

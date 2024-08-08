@@ -177,7 +177,7 @@ class Attend(nn.Module):
         out = einsum(f"b h i j, b h j d -> b h i d", attn, v)
 
         return out
-    
+
 class RMSNorm(Module):
     def __init__(self, dim):
         super().__init__()

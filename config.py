@@ -6,6 +6,6 @@ config = {
     "version": 1,
     'diagnosis': 1,
     'image_size': 128,
-    'depth': 3,
-    'num_sample': 49,
+    'depth': 1,
+    'num_sample': 25,
 }

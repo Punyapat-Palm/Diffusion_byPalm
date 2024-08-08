@@ -16,8 +16,8 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '1'
 torch.cuda.empty_cache()
 
 def sample_images(model, output_dir, sample_batch_size=1, device='cuda'):
-    model = model.to(device)
     model.eval()
+    model.to(device)
 
     # Generate random noise
     x = torch.randn(
@@ -27,13 +27,10 @@ def sample_images(model, output_dir, sample_batch_size=1, device='cuda'):
     intermediate_images = []
     sample_steps = torch.arange(model.t_range - 1, 0, -1)
 
-    # Ensure the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-
     # Denoise the initial noise for T steps
     for t in tqdm(sample_steps, desc="Sampling"):
         x = model.denoise_sample(x, t)
-        
+
         if t % 25 == 0 or t == sample_steps[-1]:
             intermediate_sample = (x.clamp(-1, 1) + 1) / 2
             intermediate_sample = (intermediate_sample * 255).type(torch.uint8)
@@ -94,8 +91,11 @@ if __name__ == "__main__":
     	default=0
     ) + 1
     output_directory = '{}/Image_{}'.format(opdir, num_img_fd)
-    
-    logging.basicConfig(filename=os.path.join(output_directory, "outputS.txt"), level=logging.INFO, format='%(asctime)s - %(message)s')
+
+    # Ensure the output directory exists
+    os.makedirs(output_directory, exist_ok=True)
+
+    logging.basicConfig(filename=os.path.join(output_directory, "outputS.log"), level=logging.INFO, format='%(asctime)s - %(message)s')
 
     # Initialize your DiffusionModel sure to initialize with appropriate parameters
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     # Initialize model, optimizer
     model_path = torch.load(model_checkpoint, map_location=device, weights_only=True)
-    model = DiffusionModel(model_path['image_size'] * model_path['image_size'], model_path['diffusion_steps'], device)
+    model = DiffusionModel(model_path['image_size'] * model_path['image_size'], model_path['diffusion_steps'], model_path['depth'], device)
     model.load_state_dict(model_path['model_state_dict'])
 
     # Sample images using the model

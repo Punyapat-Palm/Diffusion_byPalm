@@ -21,10 +21,10 @@ train_dataset = DiffSet(True)
 val_dataset = DiffSet(False)
 
 train_loader = DataLoader(
-    train_dataset, batch_size=config['batch_size'], num_workers=8, shuffle=True, persistent_workers=True
+    train_dataset, batch_size=config['batch_size'], num_workers=16, shuffle=True, persistent_workers=True
 )
 val_loader = DataLoader(
-    val_dataset, batch_size=config['batch_size'], num_workers=8, shuffle=True, persistent_workers=True
+    val_dataset, batch_size=config['batch_size'], num_workers=16, shuffle=True, persistent_workers=True
 )
 
 def validate_model(model, val_loader, device):
@@ -40,8 +40,6 @@ def validate_model(model, val_loader, device):
     return val_loss / len(val_loader)
 
 def train_model(model, train_loader, val_loader, optimizer, epochs, opdir, device):
-    # Ensure the output directory exists
-    os.makedirs(opdir, exist_ok=True)
     model.to(device)
 
     best_model_path = None
@@ -110,14 +108,14 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=2e-5)
 
     #Create output folder
-    os.makedirs('./result/Stage{}'.format(config['diagnosis']), exist_ok=True)
     num_version = max(
     	[int(re.findall(r'\d+', f.name)[-1]) for f in os.scandir('result/Stage{}'.format(config['diagnosis'])) if not f.is_file()],
     	default=0
     ) + 1
-    output_dir = 'result/Stage{}/version_{}'.format(config['diagnosis'], num_version)
+    output_dir = './result/Stage{}/version_{}'.format(config['diagnosis'], num_version)
+    os.makedirs(output_dir, exist_ok=True)
 
-    logging.basicConfig(filename=os.path.join(output_dir, "outputT.txt"), level=logging.INFO, format='%(asctime)s - %(message)s')
+    logging.basicConfig(filename=os.path.join(output_dir, "outputT.log"), level=logging.INFO, format='%(asctime)s - %(message)s')
 
     print('The model is training on {}'.format(device))
     print('The model saved at {}'.format(output_dir))

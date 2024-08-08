@@ -24,7 +24,7 @@ class DiffSet(Dataset):
             for j in range(int(len(z)*0.75), len(z)):
                 image_paths.append(os.path.join(config['dataset'], f'{z[j][0]}.png'))
         return image_paths
-    
+
     def __len__(self):
         return len(self.image_paths)
 
@@ -33,5 +33,5 @@ class DiffSet(Dataset):
         img = Image.open(img_path).convert("L")  # Convert to grayscale
         img = img.resize((self.size, self.size))  # Resize to the desired size
         img = np.array(img).astype(np.float32) / 255.0  # Normalize to [0, 1]
-        img = torch.tensor(img).unsqueeze(0)  # Convert to (1, H, W) format
+        img = torch.tensor(img).unsqueeze(0) # Add a channel dimension to get (1, H, W)
         return img
