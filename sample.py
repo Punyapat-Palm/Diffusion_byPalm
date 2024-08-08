@@ -19,9 +19,9 @@ def sample_images(model, output_dir, sample_batch_size=1, device='cuda'):
     model.eval()
     model.to(device)
 
-    # Generate random noise
+    # Generate random noise (single channel for grayscale)
     x = torch.randn(
-        (sample_batch_size, model_path['depth'], model_path['image_size'], model_path['image_size']),
+        (sample_batch_size, 1, model_path['image_size'], model_path['image_size']),
         device=device
     )
     intermediate_images = []
@@ -34,15 +34,15 @@ def sample_images(model, output_dir, sample_batch_size=1, device='cuda'):
         if t % 25 == 0 or t == sample_steps[-1]:
             intermediate_sample = (x.clamp(-1, 1) + 1) / 2
             intermediate_sample = (intermediate_sample * 255).type(torch.uint8)
-            intermediate_sample = intermediate_sample.permute(0, 2, 3, 1).cpu().numpy()
+            intermediate_sample = intermediate_sample.squeeze(1).cpu().numpy()  # Convert to (H, W)
 
             # Create a grid of images
             grid_size = math.ceil(sample_batch_size ** 0.5)
             img_size = intermediate_sample.shape[1]
-            grid_img = Image.new('RGB', (img_size * grid_size, img_size * grid_size))
+            grid_img = Image.new('L', (img_size * grid_size, img_size * grid_size))
 
             for i in range(sample_batch_size):
-                img = Image.fromarray(intermediate_sample[i])
+                img = Image.fromarray(intermediate_sample[i], mode='L')
                 grid_x = (i % grid_size) * img_size
                 grid_y = (i // grid_size) * img_size
                 grid_img.paste(img, (grid_x, grid_y))
@@ -52,18 +52,18 @@ def sample_images(model, output_dir, sample_batch_size=1, device='cuda'):
     # Get the final image after denoising
     final_sample = (x.clamp(-1, 1) + 1) / 2
     final_sample = (final_sample * 255).type(torch.uint8)
-    final_sample = final_sample.permute(0, 2, 3, 1).cpu().numpy()  # Convert to HWC format
+    final_sample = final_sample.squeeze(1).cpu().numpy()  # Convert to (H, W)
 
     # Save individual final images
     for i in range(final_sample.shape[0]):
-        img = Image.fromarray(final_sample[i])
+        img = Image.fromarray(final_sample[i], mode='L')
         img.save(os.path.join(output_dir, f"final_sample_{i:02d}.png"))
 
     # Create a grid of images for the final step
-    grid_img = Image.new('RGB', (img_size * grid_size, img_size * grid_size))
+    grid_img = Image.new('L', (img_size * grid_size, img_size * grid_size))
 
     for i in range(sample_batch_size):
-        img = Image.fromarray(final_sample[i])
+        img = Image.fromarray(final_sample[i], mode='L')
         grid_x = (i % grid_size) * img_size
         grid_y = (i // grid_size) * img_size
         grid_img.paste(img, (grid_x, grid_y))
