@@ -79,7 +79,7 @@ def train_model(model, train_loader, val_loader, optimizer, epochs, opdir, devic
             model_data = {
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'epoch': epoch,
+                'epoch': epoch + 1,
                 'best_val_loss': best_val_loss,
                 'depth': config['depth'],
                 'image_size': config['image_size'],
