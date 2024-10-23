@@ -113,6 +113,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=2e-5)
 
     #Create output folder
+    os.makedirs('./result/Stage{}'.format(config['diagnosis']), exist_ok=True)
     num_version = max(
     	[int(re.findall(r'\d+', f.name)[-1]) for f in os.scandir('result/Stage{}'.format(config['diagnosis'])) if not f.is_file()],
     	default=0

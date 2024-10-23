@@ -18,10 +18,10 @@ class DiffSet(Dataset):
         image_paths = []
         z = df[df['diagnosis'] == config['diagnosis']].values.tolist()
         if self.is_train:
-            for i in range(int(len(z)*0.75)):
+            for i in range(int(len(z)*0.77)):
                 image_paths.append(os.path.join(config['dataset'], f'{z[i][0]}.png'))
         else:
-            for j in range(int(len(z)*0.75), len(z)):
+            for j in range(int(len(z)*0.77), len(z)):
                 image_paths.append(os.path.join(config['dataset'], f'{z[j][0]}.png'))
         return image_paths
 
@@ -30,8 +30,8 @@ class DiffSet(Dataset):
 
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
-        img = Image.open(img_path).convert("L")  # Convert to grayscale
+        img = Image.open(img_path).convert("RGB")  # Convert to grayscale
         img = img.resize((self.size, self.size))  # Resize to the desired size
         img = np.array(img).astype(np.float32) / 255.0  # Normalize to [0, 1]
-        img = torch.tensor(img).unsqueeze(0) # Add a channel dimension to get (1, H, W)
+        img = torch.tensor(img).permute(2, 0, 1)  # Convert to (C, H, W) format
         return img

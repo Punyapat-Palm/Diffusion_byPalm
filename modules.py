@@ -357,7 +357,7 @@ class Unet(Module):
         dim,
         init_dim = None,
         out_dim = None,
-        dim_mults = (1, 2, 4, 8),
+        dim_mults = (1, 1, 2, 2, 4, 4),
         channels = 3,
         self_condition = False,
         learned_variance = False,

@@ -13,7 +13,7 @@ class DiffusionModel(nn.Module):
         self.t_range = t_range
         self.in_size = in_size
         self.device = device
-        self.unet = Unet(dim = 64, dim_mults = (1, 2, 4, 8), channels=img_depth)
+        self.unet = Unet(dim = 64, dim_mults = (1, 1, 2, 2, 3, 4), channels=img_depth)
         self.betas = self.beta(torch.arange(t_range, device=device))
         self.alphas = 1 - self.betas
         self.alpha_bars = torch.cumprod(self.alphas, dim=0)
